@@ -379,7 +379,7 @@ function makeCard(s, idx) {
     </div>` : ""}
     ${hostel ? `<div class="card-info-row">
       <i class="fa fa-building card-info-icon"></i>
-      <span>Hostler In: <strong style="color:var(--t1)">${esc(hostel)}</strong></span>
+      <span>Hosteller In: <strong style="color:var(--t1)">${esc(hostel)}</strong></span>
     </div>` : ""}
    
    ${memory ? `<div class="card-memory" onclick="toggleMemory(this)" title="Click to expand">"${esc(memory)}"</div>` : ""}
