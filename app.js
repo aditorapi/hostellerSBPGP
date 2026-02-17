@@ -381,11 +381,7 @@ function makeCard(s, idx) {
       <i class="fa fa-building card-info-icon"></i>
       <span>In: <strong style="color:var(--t1)">${esc(hostel)}</strong></span>
     </div>` : ""}
-    
-    ${email ? `<div class="card-info-row">
-      <i class="fa fa-envelope card-info-icon"></i>
-      <span style="font-size:.68rem;word-break:break-all">${esc(email)}</span>
-    </div>` : ""}
+   
     ${memory ? `<div class="card-memory">"${esc(memory)}"</div>` : ""}
   `;
   card.appendChild(body);
