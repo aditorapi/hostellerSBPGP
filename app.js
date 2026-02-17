@@ -381,10 +381,7 @@ function makeCard(s, idx) {
       <i class="fa fa-building card-info-icon"></i>
       <span>In: <strong style="color:var(--t1)">${esc(hostel)}</strong></span>
     </div>` : ""}
-    ${phone ? `<div class="card-info-row">
-      <i class="fa fa-phone card-info-icon"></i>
-      <span>${esc(phone)}</span>
-    </div>` : ""}
+    
     ${email ? `<div class="card-info-row">
       <i class="fa fa-envelope card-info-icon"></i>
       <span style="font-size:.68rem;word-break:break-all">${esc(email)}</span>
