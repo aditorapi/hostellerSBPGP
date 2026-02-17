@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#060810"/>
+  <title>Hosteler Records</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<!-- ═══ HEADER ═══ -->
+<header class="site-header">
+  <div class="header-inner">
+
+    <!-- Logo -->
+    <div class="logo">
+      <span class="logo-hex">⬡</span>
+      <div class="logo-text">
+        <span class="logo-main">HOSTELER</span>
+        <span class="logo-sub">RECORDS</span>
+      </div>
+    </div>
+
+    <!-- Stats (hidden on small mobile) -->
+    <div class="header-stats">
+      <div class="hstat"><span class="hstat-val" id="totalCount">—</span><span class="hstat-lbl">STUDENTS</span></div>
+      <div class="hstat-sep"></div>
+      <div class="hstat"><span class="hstat-val" id="branchCount">—</span><span class="hstat-lbl">BRANCHES</span></div>
+      <div class="hstat-sep"></div>
+      <div class="hstat"><span class="hstat-val" id="yearCount">—</span><span class="hstat-lbl">BATCHES</span></div>
+    </div>
+
+    <!-- Right controls -->
+    <div class="header-right">
+      <!-- Theme toggle -->
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode" title="Toggle theme">
+        <span class="theme-icon-dark"><i class="fa fa-moon"></i></span>
+        <span class="theme-icon-light"><i class="fa fa-sun"></i></span>
+        <span class="theme-track"></span>
+      </button>
+      <!-- Live badge -->
+      <div class="live-badge">
+        <span class="live-dot"></span>
+        <span class="live-label">LIVE</span>
+      </div>
+    </div>
+
+  </div>
+</header>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-eyebrow">
+    <span class="ey-line"></span>
+    <span class="ey-text">STUDENT DIRECTORY · HOSTEL COMMUNITY</span>
+    <span class="ey-line"></span>
+  </div>
+  <h1 class="hero-title">
+    <span class="ht-line">HOSTELER</span>
+    <span class="ht-line ht-glow">RECORDS</span>
+  </h1>
+  <p class="hero-tagline">Every student. Every memory. Every batch.</p>
+  <div class="hero-terminal">
+    <span class="term-prompt">$&gt;</span>
+    <span class="term-cmd" id="termCmd">initializing…</span>
+    <span class="term-cursor">_</span>
+  </div>
+</section>
+
+<!-- ═══ CONTROLS ═══ -->
+<div class="controls-bar">
+  <div class="controls-inner">
+    <div class="search-wrap">
+      <i class="fa fa-magnifying-glass search-icon"></i>
+      <input type="text" id="searchInput" class="search-input"
+             placeholder="Search name, branch, year…"
+             autocomplete="off" spellcheck="false"/>
+      <button class="search-clear" id="clearSearch" aria-label="Clear">
+        <i class="fa fa-xmark"></i>
+      </button>
+    </div>
+    <div class="filters">
+      <select id="yearFilter" class="filter-select">
+        <option value="">All Years</option>
+      </select>
+      <select id="branchFilter" class="filter-select">
+        <option value="">All Branches</option>
+      </select>
+      <button class="reset-btn" id="resetFilters" title="Reset filters">
+        <i class="fa fa-arrows-rotate"></i>
+      </button>
+    </div>
+  </div>
+  <div class="results-bar" id="resultsBar"></div>
+</div>
+
+<!-- ═══ CARDS ═══ -->
+<main class="main-area">
+  <div class="cards-grid" id="cardsGrid">
+    <div class="loading-wrap" id="loadingState">
+      <div class="loader-ring"></div>
+      <div class="loader-text">
+        <span class="loader-label">FETCHING RECORDS</span>
+        <span class="loader-dots"><span>.</span><span>.</span><span>.</span></span>
+      </div>
+    </div>
+  </div>
+  <div class="empty-wrap" id="emptyState" style="display:none;">
+    <div class="empty-icon">🔍</div>
+    <div class="empty-msg">No records found</div>
+    <div class="empty-hint">Try different search or filters</div>
+  </div>
+</main>
+
+<!-- ═══ LIGHTBOX ═══ -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true">
+  <div class="lb-backdrop" id="lbBackdrop"></div>
+  <div class="lb-content">
+    <button class="lb-close" id="lbClose" aria-label="Close"><i class="fa fa-xmark"></i></button>
+    <div class="lb-frame">
+      <img class="lb-img" id="lbImg" src="" alt="Profile photo"/>
+      <div class="lb-corner tl"></div>
+      <div class="lb-corner tr"></div>
+      <div class="lb-corner bl"></div>
+      <div class="lb-corner br"></div>
+    </div>
+    <div class="lb-meta" id="lbMeta"></div>
+  </div>
+</div>
+
+<!-- ═══ MANUAL FALLBACK ═══ -->
+<div id="manualFallback" style="display:none;position:fixed;bottom:24px;right:16px;z-index:999;">
+  <button onclick="toggleManualInput()" class="manual-btn">📋 Paste CSV</button>
+</div>
+<div id="manualInputBox" style="display:none;position:fixed;inset:0;z-index:1000;
+  background:rgba(6,8,16,.97);backdrop-filter:blur(14px);
+  align-items:center;justify-content:center;padding:20px;">
+  <div style="width:100%;max-width:580px;display:flex;flex-direction:column;gap:12px;">
+    <div style="font-family:monospace;color:var(--cyan);letter-spacing:.14em;font-size:.8rem;">MANUAL CSV INPUT</div>
+    <p style="font-size:.76rem;color:var(--t3);">Google Sheets → File → Download → CSV. Paste below.</p>
+    <textarea id="manualCsvText" rows="9"
+      style="background:rgba(0,0,0,.4);border:1px solid rgba(0,229,255,.25);color:var(--t1);
+             font-family:monospace;font-size:.7rem;padding:12px;border-radius:10px;
+             outline:none;resize:vertical;width:100%;"
+      placeholder="Paste CSV text here…"></textarea>
+    <div style="display:flex;gap:10px;">
+      <button onclick="loadManualCSV()"
+        style="flex:1;padding:11px;background:rgba(0,229,255,.14);border:1px solid rgba(0,229,255,.4);
+               color:var(--cyan);font-family:monospace;font-size:.72rem;border-radius:9px;cursor:pointer;">
+        ✓ LOAD DATA
+      </button>
+      <button onclick="closeManualInput()"
+        style="padding:11px 18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+               color:var(--t3);font-family:monospace;font-size:.72rem;border-radius:9px;cursor:pointer;">
+        ✕
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="site-footer">
+  <span class="footer-brand">⬡ HOSTELER RECORDS</span>
+  <span class="footer-sep">·</span>
+  <span class="footer-note">Data from Google Forms</span>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
