@@ -382,7 +382,7 @@ function makeCard(s, idx) {
       <span>In: <strong style="color:var(--t1)">${esc(hostel)}</strong></span>
     </div>` : ""}
    
-    ${memory ? `<div class="card-memory">"${esc(memory)}"</div>` : ""}
+   ${memory ? `<div class="card-memory" onclick="toggleMemory(this)" title="Click to expand">"${esc(memory)}"</div>` : ""}
   `;
   card.appendChild(body);
 
@@ -594,4 +594,8 @@ function esc(s) {
   return String(s ?? "")
     .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
     .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+function toggleMemory(el) {
+  const expanded = el.classList.toggle("memory-expanded");
+  el.title = expanded ? "Click to collapse" : "Click to expand";
 }
