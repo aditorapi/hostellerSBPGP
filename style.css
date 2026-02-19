@@ -347,7 +347,7 @@ input, textarea, select {
 .shoutout-track {
   display: flex;
   gap: 20px;
-  animation: scrollLeft 60s linear infinite;
+  animation: scrollLeft 15s linear infinite;
   will-change: transform;
 }
 
