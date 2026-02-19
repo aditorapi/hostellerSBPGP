@@ -630,7 +630,7 @@ function buildShoutoutWall() {
 
   // Adjust animation speed based on content width
   const totalWidth = track.scrollWidth;
-  const speed = Math.max(60, totalWidth / 100); // Slower for more content
+  const speed = Math.max(30, totalWidth / 100); // Slower for more content
   track.style.animationDuration = speed + "s";
 }
 
