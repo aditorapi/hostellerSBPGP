@@ -199,14 +199,14 @@ function processCSV(text) {
   filtered    = [...allStudents];
 
   if (!allStudents.length) {
-    showError(`Parsed OK but 0 students found.\nDetected headers:\n[${headers.join(", ")}]\n\nCheck COL_DEF names match your sheet headers exactly.`);
+    showError(`Parsed OK but 0 students found.\nDetected headers:\n[${headers.join(", ")}]`);
     return;
   }
 
   buildFilters();
   updateStats();
   renderCards(filtered);
-  buildShoutoutWall();
+  buildShoutoutWall();  // ← MAKE SURE THIS LINE IS HERE
   setTerm(`${allStudents.length} records loaded ✓`);
 }
 
@@ -584,25 +584,26 @@ function buildShoutoutWall() {
     return mem.length > 10; // Only include substantial messages
   });
 
+  console.log("[HR] Students with memories:", withMemories.length);
+
   if (withMemories.length === 0) {
-    track.innerHTML = '<div style="text-align:center;color:var(--t3);font-size:0.8rem;padding:20px;">No shoutouts yet — be the first to share your memory!</div>';
+    track.innerHTML = '<div style="text-align:center;color:var(--t3);font-size:0.8rem;padding:20px;min-width:100%;">No shoutouts yet — be the first to share your memory!</div>';
     return;
   }
 
   // Shuffle for variety
-  const shuffled = withMemories.sort(() => Math.random() - 0.5);
+  const shuffled = [...withMemories].sort(() => Math.random() - 0.5);
 
   // Pick top 20 or all if less
   const selected = shuffled.slice(0, Math.min(20, shuffled.length));
 
-  // Duplicate the array for seamless infinite scroll
-  const doubled = [...selected, ...selected];
+  console.log("[HR] Showing", selected.length, "shoutouts");
 
   // Build cards
-  const cards = doubled.map(s => {
-    const name   = (s[COL.name]   || "").trim();
-    const branch = (s[COL.branch] || "").trim();
-    const year   = (s[COL.year]   || "").trim();
+  const cards = selected.map(s => {
+    const name   = (s[COL.name]   || "Unknown").trim();
+    const branch = (s[COL.branch] || "N/A").trim();
+    const year   = (s[COL.year]   || "—").trim();
     const memory = (s[COL.memory] || "").trim();
 
     // Truncate very long messages
@@ -628,12 +629,121 @@ function buildShoutoutWall() {
 
   track.innerHTML = cards;
 
-  // Adjust animation speed based on content width
-  const totalWidth = track.scrollWidth;
-  const speed = Math.max(10, totalWidth / 100); // Slower for more content
-  track.style.animationDuration = speed + "s";
+  // Initialize scroll controls after cards are added
+  setTimeout(() => {
+    initShoutoutScroll();
+  }, 100);
 }
 
+/* ══════════════════════════════════════════════════════
+   SHOUTOUT WALL SCROLL CONTROLS
+══════════════════════════════════════════════════════ */
+function initShoutoutScroll() {
+  const track = document.getElementById("shoutoutTrack");
+  const leftBtn = document.getElementById("scrollLeft");
+  const rightBtn = document.getElementById("scrollRight");
+
+  if (!track || !leftBtn || !rightBtn) {
+    console.log("[HR] Scroll controls not found");
+    return;
+  }
+
+  // Check if there are cards
+  const cards = track.querySelectorAll(".shoutout-card");
+  if (cards.length === 0) {
+    console.log("[HR] No shoutout cards found");
+    leftBtn.style.display = "none";
+    rightBtn.style.display = "none";
+    return;
+  }
+
+  console.log("[HR] Initializing scroll with", cards.length, "cards");
+
+  // Scroll amount (one card width + gap)
+  const scrollAmount = 320;
+
+  // Left arrow click
+  leftBtn.addEventListener("click", () => {
+    track.scrollBy({
+      left: -scrollAmount,
+      behavior: "smooth"
+    });
+  });
+
+  // Right arrow click
+  rightBtn.addEventListener("click", () => {
+    track.scrollBy({
+      left: scrollAmount,
+      behavior: "smooth"
+    });
+  });
+
+  // Update arrow states based on scroll position
+  function updateArrows() {
+    const isAtStart = track.scrollLeft <= 5;
+    const isAtEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 5;
+
+    leftBtn.disabled = isAtStart;
+    rightBtn.disabled = isAtEnd;
+
+    leftBtn.style.opacity = isAtStart ? "0.3" : "1";
+    rightBtn.style.opacity = isAtEnd ? "0.3" : "1";
+  }
+
+  // Check arrow states on scroll
+  track.addEventListener("scroll", updateArrows);
+  
+  // Initial check
+  setTimeout(updateArrows, 200);
+
+  // Recheck on window resize
+  window.addEventListener("resize", updateArrows);
+
+  // Mouse drag to scroll
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+
+  track.addEventListener("mousedown", (e) => {
+    isDown = true;
+    track.style.cursor = "grabbing";
+    startX = e.pageX - track.offsetLeft;
+    scrollLeft = track.scrollLeft;
+  });
+
+  track.addEventListener("mouseleave", () => {
+    isDown = false;
+    track.style.cursor = "grab";
+  });
+
+  track.addEventListener("mouseup", () => {
+    isDown = false;
+    track.style.cursor = "grab";
+  });
+
+  track.addEventListener("mousemove", (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - track.offsetLeft;
+    const walk = (x - startX) * 2;
+    track.scrollLeft = scrollLeft - walk;
+  });
+
+  // Touch support for mobile
+  let touchStartX = 0;
+  let touchScrollLeft = 0;
+
+  track.addEventListener("touchstart", (e) => {
+    touchStartX = e.touches[0].pageX;
+    touchScrollLeft = track.scrollLeft;
+  }, { passive: true });
+
+  track.addEventListener("touchmove", (e) => {
+    const touchX = e.touches[0].pageX;
+    const walk = (touchStartX - touchX) * 1.5;
+    track.scrollLeft = touchScrollLeft + walk;
+  }, { passive: true });
+}
 /* ══════════════════════════════════════════════════════
    HELPERS
 ══════════════════════════════════════════════════════ */
