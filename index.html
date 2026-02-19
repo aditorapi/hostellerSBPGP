@@ -40,6 +40,11 @@
 
     <!-- Right controls -->
     <div class="header-right">
+      <!-- Support Button -->
+      <a href="support.html" class="support-btn-header">
+        <i class="fa fa-heart"></i>
+        <span>Support</span>
+      </a>
       <!-- Theme toggle -->
       <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode" title="Toggle theme">
         <span class="theme-icon-dark"><i class="fa fa-moon"></i></span>
@@ -74,6 +79,19 @@
     <span class="term-cursor">_</span>
   </div>
 </section>
+</section>
+
+<!-- ═══ SHOUTOUT WALL ═══ -->
+<div class="shoutout-wall">
+  <div class="shoutout-header">
+    <i class="fa fa-bullhorn"></i>
+    <span>SHOUTOUTS & MEMORIES</span>
+  </div>
+  <div class="shoutout-track" id="shoutoutTrack">
+    <!-- Messages auto-populate from CSV memory column -->
+  </div>
+</div>
+
 
 <!-- ═══ CONTROLS ═══ -->
 <div class="controls-bar">
@@ -168,12 +186,18 @@
 
 <!-- ═══ FOOTER ═══ -->
 <footer class="site-footer">
-  <span class="footer-brand">⬡ HOSTELLER RECORDS</span>
-  <span class="footer-sep">·</span>
-  <span class="footer-note">Developed by Aditya Prajapati © 2026
-</span>
+  <div class="footer-inner">
+    <div class="footer-left">
+      <span class="footer-brand">⬡ HOSTELER RECORDS</span>
+      <span class="footer-sep">·</span>
+      <span class="footer-note">Developed by Aditya Prajapati © 2026</span>
+    </div>
+    <a href="support.html" class="support-btn-footer">
+      <i class="fa fa-heart"></i>
+      <span>Support & Feedback</span>
+    </a>
+  </div>
 </footer>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="app.js"></script>
 </body>

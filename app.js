@@ -206,6 +206,7 @@ function processCSV(text) {
   buildFilters();
   updateStats();
   renderCards(filtered);
+  buildShoutoutWall();
   setTerm(`${allStudents.length} records loaded ✓`);
 }
 
@@ -569,6 +570,68 @@ function debugDump() {
     ? `COL MAP:\n${JSON.stringify(COL, null, 2)}\n\nFIRST ROW:\n${JSON.stringify(allStudents[0], null, 2)}`
     : "No data loaded yet.";
   alert("[HOSTELER RECORDS DEBUG]\n\n" + info);
+}
+/* ══════════════════════════════════════════════════════
+   SHOUTOUT WALL
+══════════════════════════════════════════════════════ */
+function buildShoutoutWall() {
+  const track = document.getElementById("shoutoutTrack");
+  if (!track) return;
+
+  // Get all students with memories
+  const withMemories = allStudents.filter(s => {
+    const mem = (s[COL.memory] || "").trim();
+    return mem.length > 10; // Only include substantial messages
+  });
+
+  if (withMemories.length === 0) {
+    track.innerHTML = '<div style="text-align:center;color:var(--t3);font-size:0.8rem;padding:20px;">No shoutouts yet — be the first to share your memory!</div>';
+    return;
+  }
+
+  // Shuffle for variety
+  const shuffled = withMemories.sort(() => Math.random() - 0.5);
+
+  // Pick top 20 or all if less
+  const selected = shuffled.slice(0, Math.min(20, shuffled.length));
+
+  // Duplicate the array for seamless infinite scroll
+  const doubled = [...selected, ...selected];
+
+  // Build cards
+  const cards = doubled.map(s => {
+    const name   = (s[COL.name]   || "").trim();
+    const branch = (s[COL.branch] || "").trim();
+    const year   = (s[COL.year]   || "").trim();
+    const memory = (s[COL.memory] || "").trim();
+
+    // Truncate very long messages
+    const displayMemory = memory.length > 180 
+      ? memory.slice(0, 180) + "…" 
+      : memory;
+
+    return `
+      <div class="shoutout-card">
+        <div class="shoutout-message">"${esc(displayMemory)}"</div>
+        <div class="shoutout-author">
+          <div class="shoutout-name">
+            <i class="fa fa-user-circle"></i>
+            ${esc(name)}
+          </div>
+          <div class="shoutout-meta">
+            ${esc(branch)} · ${esc(year)}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  track.innerHTML = cards;
+
+  // Adjust animation speed based on content width
+  const totalWidth = track.scrollWidth;
+  const speed = Math.max(60, totalWidth / 100); // Slower for more content
+  track.style.animationDuration = speed + "s";
 }
 
 /* ══════════════════════════════════════════════════════
