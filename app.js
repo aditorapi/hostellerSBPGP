@@ -6,7 +6,111 @@
    Previous version tried each one sequentially and
    waited for full timeout before trying the next.
 ══════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════
+   PWA - PROGRESSIVE WEB APP
+══════════════════════════════════════════════════════ */
+let deferredPrompt;
 
+// Register Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(reg => console.log('[PWA] Service Worker registered:', reg.scope))
+      .catch(err => console.log('[PWA] Service Worker registration failed:', err));
+  });
+}
+
+// Capture beforeinstallprompt event
+window.addEventListener('beforeinstallprompt', (e) => {
+  console.log('[PWA] beforeinstallprompt event fired');
+  e.preventDefault();
+  deferredPrompt = e;
+  
+  // Check if user dismissed before (don't show again for 7 days)
+  const dismissedTime = localStorage.getItem('pwa-dismissed');
+  const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+  
+  if (!dismissedTime || parseInt(dismissedTime) < sevenDaysAgo) {
+    // Show install prompt after 3 seconds
+    setTimeout(() => {
+      showPWAPrompt();
+    }, 3000);
+  }
+});
+
+// Show PWA install prompt
+function showPWAPrompt() {
+  const prompt = document.getElementById('pwaPrompt');
+  if (!prompt) return;
+  
+  prompt.classList.add('show');
+  
+  // Install button
+  const installBtn = document.getElementById('pwaInstallBtn');
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) {
+      alert('Installation not available. Try adding to home screen manually.');
+      return;
+    }
+    
+    // Show native install prompt
+    deferredPrompt.prompt();
+    
+    // Wait for user choice
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`[PWA] User ${outcome === 'accepted' ? 'accepted' : 'dismissed'} the install prompt`);
+    
+    if (outcome === 'accepted') {
+      hidePWAPrompt();
+    }
+    
+    deferredPrompt = null;
+  });
+  
+  // Later button
+  const laterBtn = document.getElementById('pwaLaterBtn');
+  laterBtn.addEventListener('click', () => {
+    localStorage.setItem('pwa-dismissed', Date.now().toString());
+    hidePWAPrompt();
+  });
+  
+  // Close button
+  const closeBtn = document.getElementById('pwaClose');
+  closeBtn.addEventListener('click', () => {
+    localStorage.setItem('pwa-dismissed', Date.now().toString());
+    hidePWAPrompt();
+  });
+  
+  // Backdrop click
+  const backdrop = document.getElementById('pwaBackdrop');
+  backdrop.addEventListener('click', () => {
+    localStorage.setItem('pwa-dismissed', Date.now().toString());
+    hidePWAPrompt();
+  });
+}
+
+function hidePWAPrompt() {
+  const prompt = document.getElementById('pwaPrompt');
+  if (prompt) prompt.classList.remove('show');
+}
+
+// Listen for successful install
+window.addEventListener('appinstalled', () => {
+  console.log('[PWA] App installed successfully');
+  hidePWAPrompt();
+  deferredPrompt = null;
+});
+
+// Update theme color based on current theme
+function updatePWATheme() {
+  const theme = document.documentElement.getAttribute('data-theme');
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+  if (metaTheme) {
+    metaTheme.content = theme === 'dark' ? '#060810' : '#f0f4ff';
+  }
+}
+
+/* ══════════════════════════════════════════════════════ */
 const SHEET_CSV =
   "https://docs.google.com/spreadsheets/d/e/" +
   "2PACX-1vQU5qmeMbH_XTbOdilRG-yN1VzREzQbXRGvEFjL7iziBBigPqTmGwhHVOcqaElP8YDJq15qM4BlvWLN/" +
