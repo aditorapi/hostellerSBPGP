@@ -10,6 +10,14 @@
    PWA - PROGRESSIVE WEB APP
 ══════════════════════════════════════════════════════ */
 let deferredPrompt;
+let isAppInstalled = false;
+
+// Check if app is already installed
+if (window.matchMedia('(display-mode: standalone)').matches || 
+    window.navigator.standalone === true) {
+  isAppInstalled = true;
+  console.log('[PWA] App is running in standalone mode');
+}
 
 // Register Service Worker
 if ('serviceWorker' in navigator) {
@@ -26,19 +34,78 @@ window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
   
-  // Check if user dismissed before (don't show again for 7 days)
+  // Show header install button
+  showHeaderInstallButton();
+  
+  // Check if user dismissed popup before (don't show again for 7 days)
   const dismissedTime = localStorage.getItem('pwa-dismissed');
   const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
   
   if (!dismissedTime || parseInt(dismissedTime) < sevenDaysAgo) {
-    // Show install prompt after 3 seconds
+    // Show install popup after 3 seconds
     setTimeout(() => {
       showPWAPrompt();
     }, 3000);
   }
 });
 
-// Show PWA install prompt
+// Show header install button
+function showHeaderInstallButton() {
+  const headerBtn = document.getElementById('pwaInstallHeader');
+  if (!headerBtn) return;
+  
+  if (isAppInstalled) {
+    // Show as installed
+    headerBtn.style.display = 'flex';
+    headerBtn.classList.add('installed');
+    headerBtn.innerHTML = '<i class="fa fa-check-circle"></i><span class="pwa-install-text">Installed</span>';
+  } else {
+    // Show install button
+    headerBtn.style.display = 'flex';
+    headerBtn.addEventListener('click', handleHeaderInstall);
+  }
+}
+
+// Handle header button install
+async function handleHeaderInstall() {
+  if (!deferredPrompt) {
+    // Fallback: show popup if prompt not available
+    showPWAPrompt();
+    return;
+  }
+  
+  // Show native install prompt
+  deferredPrompt.prompt();
+  
+  // Wait for user choice
+  const { outcome } = await deferredPrompt.userChoice;
+  console.log(`[PWA] User ${outcome === 'accepted' ? 'accepted' : 'dismissed'} the install prompt`);
+  
+  if (outcome === 'accepted') {
+    hidePWAPrompt();
+    updateHeaderButtonInstalled();
+  }
+  
+  deferredPrompt = null;
+}
+
+// Update header button to installed state
+function updateHeaderButtonInstalled() {
+  const headerBtn = document.getElementById('pwaInstallHeader');
+  if (!headerBtn) return;
+  
+  headerBtn.classList.add('installed');
+  headerBtn.innerHTML = '<i class="fa fa-check-circle"></i><span class="pwa-install-text">Installed</span>';
+  headerBtn.removeEventListener('click', handleHeaderInstall);
+  
+  // Animate success
+  headerBtn.style.transform = 'scale(1.1)';
+  setTimeout(() => {
+    headerBtn.style.transform = 'scale(1)';
+  }, 300);
+}
+
+// Show PWA install popup
 function showPWAPrompt() {
   const prompt = document.getElementById('pwaPrompt');
   if (!prompt) return;
@@ -47,7 +114,7 @@ function showPWAPrompt() {
   
   // Install button
   const installBtn = document.getElementById('pwaInstallBtn');
-  installBtn.addEventListener('click', async () => {
+  const installHandler = async () => {
     if (!deferredPrompt) {
       alert('Installation not available. Try adding to home screen manually.');
       return;
@@ -62,31 +129,44 @@ function showPWAPrompt() {
     
     if (outcome === 'accepted') {
       hidePWAPrompt();
+      updateHeaderButtonInstalled();
     }
     
     deferredPrompt = null;
-  });
+  };
+  
+  installBtn.removeEventListener('click', installHandler); // Remove old listeners
+  installBtn.addEventListener('click', installHandler);
   
   // Later button
   const laterBtn = document.getElementById('pwaLaterBtn');
-  laterBtn.addEventListener('click', () => {
+  const laterHandler = () => {
     localStorage.setItem('pwa-dismissed', Date.now().toString());
     hidePWAPrompt();
-  });
+  };
+  
+  laterBtn.removeEventListener('click', laterHandler);
+  laterBtn.addEventListener('click', laterHandler);
   
   // Close button
   const closeBtn = document.getElementById('pwaClose');
-  closeBtn.addEventListener('click', () => {
+  const closeHandler = () => {
     localStorage.setItem('pwa-dismissed', Date.now().toString());
     hidePWAPrompt();
-  });
+  };
+  
+  closeBtn.removeEventListener('click', closeHandler);
+  closeBtn.addEventListener('click', closeHandler);
   
   // Backdrop click
   const backdrop = document.getElementById('pwaBackdrop');
-  backdrop.addEventListener('click', () => {
+  const backdropHandler = () => {
     localStorage.setItem('pwa-dismissed', Date.now().toString());
     hidePWAPrompt();
-  });
+  };
+  
+  backdrop.removeEventListener('click', backdropHandler);
+  backdrop.addEventListener('click', backdropHandler);
 }
 
 function hidePWAPrompt() {
@@ -98,7 +178,9 @@ function hidePWAPrompt() {
 window.addEventListener('appinstalled', () => {
   console.log('[PWA] App installed successfully');
   hidePWAPrompt();
+  updateHeaderButtonInstalled();
   deferredPrompt = null;
+  isAppInstalled = true;
 });
 
 // Update theme color based on current theme
@@ -110,6 +192,14 @@ function updatePWATheme() {
   }
 }
 
+// Show header button on page load if already installable
+document.addEventListener('DOMContentLoaded', () => {
+  if (isAppInstalled) {
+    showHeaderInstallButton();
+  }
+});
+
+/* ══════════════════════════════════════════════════════ */
 /* ══════════════════════════════════════════════════════ */
 const SHEET_CSV =
   "https://docs.google.com/spreadsheets/d/e/" +
