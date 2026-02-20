@@ -174,6 +174,7 @@ function applyTheme(theme, animate) {
   if (metaTheme) {
     metaTheme.content = theme === "dark" ? "#060810" : "#f0f4ff";
   }
+   updatePWATheme();
 }
 
 /* ══════════════════════════════════════════════════════
