@@ -235,18 +235,111 @@ input, textarea, select {
 [data-theme="light"] .theme-icon-light { opacity:1; }
 [data-theme="light"] .theme-icon-dark  { opacity:.3; }
 
-/* Live badge */
-.live-badge {
-  display:flex;align-items:center;gap:5px;
-  background:rgba(0,255,135,0.07);border:1px solid rgba(0,255,135,0.2);
-  padding:4px 10px;border-radius:100px;
+/* ══════════════════════════════
+   PWA INSTALL BUTTON (Header)
+══════════════════════════════ */
+.pwa-install-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(0,229,255,0.12), rgba(139,92,246,0.12));
+  border: 1.5px solid rgba(0,229,255,0.3);
+  color: var(--cyan);
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
 }
-.live-dot {
-  width:5px;height:5px;background:var(--green);border-radius:50%;
-  box-shadow:0 0 6px var(--green);animation:livePulse 1.5s ease-in-out infinite;
+
+.pwa-install-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  opacity: 0;
+  transition: opacity 0.3s;
 }
-@keyframes livePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.6)}}
-.live-label { font-family:'JetBrains Mono',monospace;font-size:.55rem;letter-spacing:.13em;color:var(--green); }
+
+.pwa-install-header:hover::before {
+  opacity: 0.15;
+}
+
+.pwa-install-header:hover {
+  border-color: var(--cyan);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0,229,255,0.25);
+}
+
+.pwa-install-header:active {
+  transform: translateY(0) scale(0.96);
+}
+
+.pwa-install-header i,
+.pwa-install-header span {
+  position: relative;
+  z-index: 1;
+}
+
+.pwa-icon-animate {
+  font-size: 0.85rem;
+  animation: downloadBounce 2s ease-in-out infinite;
+}
+
+@keyframes downloadBounce {
+  0%, 100% { transform: translateY(0); }
+  10%, 30% { transform: translateY(-3px); }
+  20%, 40% { transform: translateY(0); }
+}
+
+/* Installed state */
+.pwa-install-header.installed {
+  background: linear-gradient(135deg, rgba(0,255,135,0.12), rgba(0,229,255,0.12));
+  border-color: rgba(0,255,135,0.3);
+  color: var(--green);
+  cursor: default;
+  pointer-events: none;
+}
+
+.pwa-install-header.installed i {
+  animation: none;
+}
+
+/* Light theme */
+[data-theme="light"] .pwa-install-header {
+  background: linear-gradient(135deg, rgba(0,100,220,0.1), rgba(107,63,212,0.1));
+  border-color: rgba(0,100,220,0.3);
+  color: #0066dd;
+}
+
+[data-theme="light"] .pwa-install-header:hover {
+  border-color: #0066dd;
+  box-shadow: 0 4px 16px rgba(0,100,220,0.2);
+}
+
+[data-theme="light"] .pwa-install-header.installed {
+  background: linear-gradient(135deg, rgba(0,170,85,0.12), rgba(0,100,220,0.12));
+  border-color: rgba(0,170,85,0.3);
+  color: #00aa55;
+}
+
+/* Mobile - hide text, show only icon */
+@media (max-width: 600px) {
+  .pwa-install-text {
+    display: none;
+  }
+  .pwa-install-header {
+    padding: 7px 10px;
+  }
+  .pwa-icon-animate {
+    font-size: 0.9rem;
+  }
+}
 
 /* ══════════════════════════════
    HERO
